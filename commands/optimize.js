@@ -1,17 +1,30 @@
 import { callDobby } from "../utils/dobbyClient.js";
 
+async function keepTyping(channel, callback) {
+  const interval = setInterval(() => {
+    channel.sendTyping().catch(() => {});
+  }, 9000);
+  try {
+    return await callback();
+  } finally {
+    clearInterval(interval);
+  }
+}
+
 export default {
   name: "optimize",
-  description: "Optimizes code for performance or readability",
-  async execute(message, args) {
-    if (!args) return message.reply("Please provide code to optimize.");
+  description: "Optimize code",
+  async execute(interaction, args) {
+    const code = args;
+    if (!code) return interaction.reply("Please provide code to optimize.");
 
-    const prompt = `Optimize this code for performance and readability:\n${args}`;
-    const reply = await callDobby(prompt);
+    const reply = await keepTyping(interaction.channel, async () => {
+      return await callDobby(code, "optimize");
+    });
 
     const chunks = reply.match(/[\s\S]{1,1900}/g) || [];
     for (const chunk of chunks) {
-      await message.reply(chunk);
+      await interaction.followUp(chunk);
     }
   },
 };
