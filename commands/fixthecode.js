@@ -1,31 +1,22 @@
 import { SlashCommandBuilder } from "discord.js";
 import { queryDobby } from "../utils/dobbyClient.js";
-import { userCodeMemory } from "./pastecode.js";
+import { savedCode } from "./pastecode.js";
 
-export const data = new SlashCommandBuilder()
-  .setName("fixthecode")
-  .setDescription("Ask Dobby to fix your last pasted code and explain it.");
+export default {
+  data: new SlashCommandBuilder()
+    .setName("fixthecode")
+    .setDescription("Fixes the pasted code using Dobby 70B model"),
+  async execute(interaction) {
+    await interaction.deferReply();
 
-export async function execute(interaction) {
-  await interaction.deferReply();
+    if (!savedCode) {
+      await interaction.editReply("⚠️ Please use `/pastecode` first to provide your code.");
+      return;
+    }
 
-  const userId = interaction.user.id;
-  const code = userCodeMemory.get(userId);
+    const prompt = `Fix the following broken code and explain the fixes clearly:\n\n${savedCode}`;
+    const response = await queryDobby(prompt);
 
-  if (!code) {
-    await interaction.editReply("❌ No code found! Use `/pastecode` first.");
-    return;
-  }
-
-  const prompt = `
-You are Dobby Debugging Buddy. Fix this code and explain what was wrong and how you fixed it. 
-Only return:
-1. Fixed code (inside a code block)
-2. Short explanation
------------------------
-${code}
-`;
-
-  const response = await queryDobby(prompt);
-  await interaction.editReply(response);
-}
+    await interaction.editReply(response);
+  },
+};
