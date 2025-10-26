@@ -1,29 +1,22 @@
-import axios from "axios";
+import fetch from "node-fetch";
 import dotenv from "dotenv";
 dotenv.config();
 
-export async function callDobby(prompt) {
-  try {
-    const response = await axios.post(
-      "https://api.fireworks.ai/inference/v1/completions",
-      {
-        model: "accounts/sentientfoundation-serverless/models/dobby-mini-unhinged-plus-llama-3-1-8b",
-        prompt: `You are Dobby, a witty debugging assistant. Help the user with the following:\n${prompt}`,
-        max_tokens: 512,
-        temperature: 0.5,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.FIREWORKS_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+export async function queryDobby(code) {
+  const response = await fetch("https://api.fireworks.ai/inference/v1/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.FIREWORKS_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-70b-new",
+      prompt: `Fix this code and explain it:\n\n${code}\n\nReturn both corrected code and explanation.`,
+      max_tokens: 1500,
+      temperature: 0.7,
+    }),
+  });
 
-    return response.data.choices?.[0]?.text?.trim() || "Dobby couldn't generate a response 😢";
-
-  } catch (err) {
-    console.error("🔥 Fireworks API error:", err.response?.data || err.message);
-    return "⚠️ Dobby failed to respond!";
-  }
+  const data = await response.json();
+  return data.choices?.[0]?.text?.trim() || "No response from model.";
 }
