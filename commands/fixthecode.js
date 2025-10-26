@@ -1,22 +1,17 @@
 import { SlashCommandBuilder } from "discord.js";
+import { storedCode } from "./pastecode.js";
 import { queryDobby } from "../utils/dobbyClient.js";
-import { savedCode } from "./pastecode.js";
 
 export default {
   data: new SlashCommandBuilder()
     .setName("fixthecode")
-    .setDescription("Fixes the pasted code using Dobby 70B model"),
+    .setDescription("Fix broken code and explain it"),
   async execute(interaction) {
-    await interaction.deferReply();
-
-    if (!savedCode) {
-      await interaction.editReply("⚠️ Please use `/pastecode` first to provide your code.");
+    if (!storedCode) {
+      await interaction.editReply("⚠️ Use `/pastecode` first to provide code.");
       return;
     }
-
-    const prompt = `Fix the following broken code and explain the fixes clearly:\n\n${savedCode}`;
-    const response = await queryDobby(prompt);
-
-    await interaction.editReply(response);
+    const result = await queryDobby(`Fix this code and explain: \n${storedCode}`);
+    await interaction.editReply(result);
   },
 };

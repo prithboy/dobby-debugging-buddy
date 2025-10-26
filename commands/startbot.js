@@ -3,8 +3,8 @@ import { SlashCommandBuilder } from "discord.js";
 export default {
   data: new SlashCommandBuilder()
     .setName("startbot")
-    .setDescription("Confirms Dobby Debugging Buddy is running"),
+    .setDescription("Check if Dobby Debugging Buddy is online"),
   async execute(interaction) {
-    await interaction.editreply("✅ Dobby Debugging Buddy is running and ready to debug!");
+    await interaction.editReply("✅ Dobby Debugging Buddy is online!");
   },
 };

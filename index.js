@@ -1,41 +1,37 @@
+import { Client, Collection, GatewayIntentBits } from "discord.js";
 import fs from "fs";
-import { Client, GatewayIntentBits } from "discord.js";
-import dotenv from "dotenv";
-dotenv.config();
+import path from "path";
+import "dotenv/config";
 
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-  ],
-});
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+client.commands = new Collection();
 
-// Load commands
-const commands = new Map();
-const commandFiles = fs.readdirSync("./commands").filter(f => f.endsWith(".js"));
+const commandsPath = path.join(process.cwd(), "commands");
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".js"));
+
 for (const file of commandFiles) {
-  const cmd = await import(`./commands/${file}`);
-  commands.set(cmd.default.name, cmd.default);
+  const command = await import(`./commands/${file}`);
+  if (!command.default?.data) continue;
+  client.commands.set(command.default.data.name, command.default);
 }
-
-client.once("ready", () => {
-  console.log(`🤖 Dobby Debugging Buddy online as ${client.user.tag}`);
-});
 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
-  const command = commands.get(interaction.commandName);
+
+  const command = client.commands.get(interaction.commandName);
   if (!command) return;
 
   try {
-    // Immediately acknowledge the command to prevent timeout
-    await interaction.deferReply();
+    await interaction.deferReply(); // immediately acknowledge
     await command.execute(interaction);
   } catch (error) {
-    console.error("Error executing command:", error);
-    await interaction.editReply("⚠️ Oops, something went wrong.");
+    console.error(error);
+    await interaction.editReply("⚠️ Error executing command.");
   }
+});
+
+client.once("ready", () => {
+  console.log(`🤖 Dobby Debugging Buddy online as ${client.user.tag}`);
 });
 
 client.login(process.env.DISCORD_TOKEN);

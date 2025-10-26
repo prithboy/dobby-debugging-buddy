@@ -1,18 +1,18 @@
 import { SlashCommandBuilder } from "discord.js";
 
-let savedCode = "";
+export let storedCode = "";
 
 export default {
   data: new SlashCommandBuilder()
     .setName("pastecode")
-    .setDescription("Paste your broken code so Dobby can fix it")
+    .setDescription("Paste broken code to fix")
     .addStringOption(option =>
-      option.setName("code").setDescription("Your broken code").setRequired(true)
+      option.setName("code")
+            .setDescription("Your broken code")
+            .setRequired(true)
     ),
   async execute(interaction) {
-    savedCode = interaction.options.getString("code");
-    await interaction.editreply("🧠 Code received! Now run `/fixthecode` to debug it.");
+    storedCode = interaction.options.getString("code");
+    await interaction.editReply("📝 Code saved for fixing!");
   },
 };
-
-export { savedCode };
