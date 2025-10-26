@@ -1,30 +1,17 @@
 import { callDobby } from "../utils/dobbyClient.js";
 
-async function keepTyping(channel, callback) {
-  const interval = setInterval(() => {
-    channel.sendTyping().catch(() => {});
-  }, 9000);
-  try {
-    return await callback();
-  } finally {
-    clearInterval(interval);
-  }
-}
-
 export default {
   name: "explain",
-  description: "Explain code",
-  async execute(interaction, args) {
-    const code = args;
-    if (!code) return interaction.reply("Please provide code to explain.");
+  description: "Explains what the code does",
+  async execute(message, args) {
+    if (!args) return message.reply("Please provide code to explain.");
 
-    const reply = await keepTyping(interaction.channel, async () => {
-      return await callDobby(code, "explain");
-    });
+    const prompt = `Explain what this code does in simple terms:\n${args}`;
+    const reply = await callDobby(prompt);
 
     const chunks = reply.match(/[\s\S]{1,1900}/g) || [];
     for (const chunk of chunks) {
-      await interaction.followUp(chunk);
+      await message.reply(chunk);
     }
   },
 };

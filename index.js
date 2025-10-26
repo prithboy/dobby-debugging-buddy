@@ -1,10 +1,14 @@
 import fs from "fs";
-import { Client, GatewayIntentBits, Events } from "discord.js";
+import { Client, GatewayIntentBits } from "discord.js";
 import dotenv from "dotenv";
 dotenv.config();
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 // Load commands
@@ -19,22 +23,20 @@ client.once("ready", () => {
   console.log(`🤖 Dobby Debugging Buddy online as ${client.user.tag}`);
 });
 
-client.on(Events.InteractionCreate, async interaction => {
-  if (!interaction.isChatInputCommand()) return;
+client.on("messageCreate", async (message) => {
+  if (message.author.bot) return;
+  if (!message.content.startsWith("!")) return;
 
-  const code = interaction.options.getString('code');
+  const args = message.content.slice(1).split(/ +/);
+  const cmdName = args.shift().toLowerCase();
 
-  await interaction.deferReply(); // shows typing
-
-  if (!commands.has(interaction.commandName)) {
-    return interaction.followUp("Unknown command!");
-  }
+  if (!commands.has(cmdName)) return;
 
   try {
-    await commands.get(interaction.commandName).execute(interaction, code);
+    await commands.get(cmdName).execute(message, args.join(" "));
   } catch (err) {
     console.error(err);
-    interaction.followUp("⚠️ Something went wrong while executing the command.");
+    message.reply("⚠️ Something went wrong while executing the command.");
   }
 });
 
