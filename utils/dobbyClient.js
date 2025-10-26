@@ -10,7 +10,7 @@ export async function queryDobby(code) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-70b-new",
+      model: "accounts/sentientfoundation-serverless/models/dobby-mini-unhinged-plus-llama-3-1-8b",
       prompt: `Fix this code and explain it:\n\n${code}\n\nReturn both corrected code and explanation.`,
       max_tokens: 1500,
       temperature: 0.7,
