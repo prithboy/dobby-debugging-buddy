@@ -5,6 +5,6 @@ export default {
     .setName("startbot")
     .setDescription("Confirms Dobby Debugging Buddy is running"),
   async execute(interaction) {
-    await interaction.reply("✅ Dobby Debugging Buddy is running and ready to debug!");
+    await interaction.editreply("✅ Dobby Debugging Buddy is running and ready to debug!");
   },
 };

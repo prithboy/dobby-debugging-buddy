@@ -23,20 +23,18 @@ client.once("ready", () => {
   console.log(`🤖 Dobby Debugging Buddy online as ${client.user.tag}`);
 });
 
-client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
-  if (!message.content.startsWith("!")) return;
-
-  const args = message.content.slice(1).split(/ +/);
-  const cmdName = args.shift().toLowerCase();
-
-  if (!commands.has(cmdName)) return;
+client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isCommand()) return;
+  const command = commands.get(interaction.commandName);
+  if (!command) return;
 
   try {
-    await commands.get(cmdName).execute(message, args.join(" "));
-  } catch (err) {
-    console.error(err);
-    message.reply("⚠️ Something went wrong while executing the command.");
+    // Immediately acknowledge the command to prevent timeout
+    await interaction.deferReply();
+    await command.execute(interaction);
+  } catch (error) {
+    console.error("Error executing command:", error);
+    await interaction.editReply("⚠️ Oops, something went wrong.");
   }
 });
 

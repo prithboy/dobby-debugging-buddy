@@ -11,7 +11,7 @@ export default {
     ),
   async execute(interaction) {
     savedCode = interaction.options.getString("code");
-    await interaction.reply("🧠 Code received! Now run `/fixthecode` to debug it.");
+    await interaction.editreply("🧠 Code received! Now run `/fixthecode` to debug it.");
   },
 };
 
